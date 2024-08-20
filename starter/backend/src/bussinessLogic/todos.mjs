@@ -1,5 +1,9 @@
 import * as uuid from 'uuid'
 import { TodosAccess } from '../dataLayer/todosAccess.mjs'
+import {
+  generateAttachmentUrl,
+  getFormattedUrl
+} from '../fileStorage/attachmentUtils.mjs'
 import { createLogger } from '../utils/logger.mjs'
 
 const logger = createLogger('businessLogic')
@@ -14,14 +18,12 @@ export async function getToDosByUserId(userId) {
 export async function createTodo(newTodo, userId) {
   logger.info('Creating a new todo')
   const todoId = uuid.v4()
-  const env = process.env.TODOS_S3_BUCKET
 
   return await todosAccess.create({
     todoId,
     userId,
     createdAt: new Date().toISOString(),
     done: false,
-    attachmentUrl: `https://${env}.s3.amazonaws.com/${todoId}`,
     ...newTodo
   })
 }
@@ -34,4 +36,12 @@ export async function updateTodo(userId, todoId, updateTodo) {
 export async function deleteTodo(userId, todoId) {
   logger.info('Deleting a todo')
   return await todosAccess.delete(userId, todoId)
+}
+
+export async function updateAttachedFileUrl(userId, todoId) {
+  logger.info('Adding a attachment')
+  const attachmentUrl = await getFormattedUrl(todoId)
+  const uploadUrl = await generateAttachmentUrl(todoId)
+  await todosAccess.updateAttachedFileUrl(userId, todoId, attachmentUrl)
+  return uploadUrl
 }

@@ -65,7 +65,7 @@ export class TodosAccess {
     await this.dynamoDbClient.update(params)
   }
 
-  async updateAttachedFileUrl(userId, todoId, image, attachmentUrl) {
+  async updateAttachedFileUrl(userId, todoId, attachmentUrl) {
     logger.info('Updating attachemnt url')
     const params = {
       TableName: this.todosTable,
@@ -73,10 +73,9 @@ export class TodosAccess {
         userId,
         todoId
       },
-      UpdateExpression: 'set image = :image, attachmentUrl = :attachmentUrl',
+      UpdateExpression: 'set attachmentUrl = :attachmentUrl',
       ExpressionAttributeValues: {
-        ':attachmentUrl': attachmentUrl,
-        ':image': image
+        ':attachmentUrl': attachmentUrl
       },
       ReturnValues: 'UPDATED_NEW'
     }
